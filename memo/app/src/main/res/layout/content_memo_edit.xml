@@ -14,7 +14,7 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/title"
+            android:id="@+id/titleMemo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -22,7 +22,7 @@
             android:inputType="textPersonName" />
 
         <EditText
-            android:id="@+id/contents"
+            android:id="@+id/contentsMemo"
             android:layout_width="match_parent"
             android:layout_height="384dp"
             android:ems="10"

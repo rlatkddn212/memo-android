@@ -1,6 +1,7 @@
 package com.ksw.memo
 
 import android.content.Intent
+import android.database.Cursor
 import android.database.DatabaseErrorHandler
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -15,7 +16,8 @@ import kotlinx.android.synthetic.main.content_main.*
 class MainActivity : AppCompatActivity(), RecyclerMemoItemClickListener.OnRecyclerClickListener{
 
     private val TAG = "MainActivity"
-    private val memoAdapter = MemoRecyclerViewAdapter(ArrayList())
+    var memolist :MutableList<MemoData> = ArrayList()
+    lateinit var memoAdapter : MemoRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,12 +26,26 @@ class MainActivity : AppCompatActivity(), RecyclerMemoItemClickListener.OnRecycl
 
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.addOnItemTouchListener(RecyclerMemoItemClickListener(this, recycler_view, this))
+        memoAdapter = MemoRecyclerViewAdapter(memolist)
         recycler_view.adapter = memoAdapter
 
         val dbHelper = MemoSQLHelper(this, DatabaseErrorHandler{
             Log.e(TAG, "DB Error")
         })
-        dbHelper.getAllMemo()
+        val cursor :Cursor = dbHelper.getAllMemo()
+
+        if (cursor.moveToFirst()) {
+            do {
+                memolist.add(
+                    MemoData(
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3)
+                    )
+                )
+
+            } while (cursor.moveToNext())
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

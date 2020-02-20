@@ -3,8 +3,10 @@ package com.ksw.memo
 import android.os.Parcel
 import android.os.Parcelable
 
-data class MemoData(var title: String? = "", var contents : String?= "", var imageURL: List<String>? = null) :Parcelable{
+data class MemoData(var title: String? = "", var contents : String?= "",
+                    var thumbnail: String? = "", var imageURL: List<String>? = null) :Parcelable{
     constructor(parcel: Parcel) : this(
+        parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.createStringArrayList()
@@ -14,6 +16,7 @@ data class MemoData(var title: String? = "", var contents : String?= "", var ima
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(title)
         parcel.writeString(contents)
+        parcel.writeString(thumbnail)
         parcel.writeStringList(imageURL)
     }
 

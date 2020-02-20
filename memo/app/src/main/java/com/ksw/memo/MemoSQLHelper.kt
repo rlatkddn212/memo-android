@@ -68,11 +68,11 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
      * contents : 메모 내용
      * return : 저장된 key id
      */
-    fun addMemo(title: String, contents: String, imageURL: List<String>) {
+    fun addMemo(title: String, contents: String, imageURL: List<String>?) {
         val contentValues = ContentValues()
         contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_TITLE, title)
         contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_CONTENTS, contents)
-        contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL.get(0))
+        contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
         val db = writableDatabase
 
        val memoId = db.insert(MemoStorage.MemoTable.TABLE_NAME, null, contentValues)
@@ -105,13 +105,13 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
     /**
      * 메모를 업데이트한다.
      */
-    fun updateMemo(memoId : Long, title: String, contents: String, imageURL: List<String>) {
+    fun updateMemo(memoId : Long, title: String, contents: String, imageURL: List<String>?) {
         val db = writableDatabase
 
         val values = ContentValues().apply {
             put(MemoStorage.MemoTable.COLUMN_NAME_TITLE, title)
             put(MemoStorage.MemoTable.COLUMN_NAME_CONTENTS, contents)
-            put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL[0])
+            put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
         }
 
         val selection = "${BaseColumns._ID} = ?"
@@ -126,14 +126,17 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
     }
 
     //---------------------------------------------------------------------------------------------- MemoImage
-    fun addMemoImage(memoId: Long, imageURL: List<String>) {
+    fun addMemoImage(memoId: Long, imageURL: List<String>?) {
         val db = writableDatabase
-        for (url in imageURL) {
-            val contentValues = ContentValues()
-            contentValues.put(MemoStorage.MemoImageTable.COLUMN_NAME_MEMO_ID, memoId)
-            contentValues.put(MemoStorage.MemoImageTable.COLUMN_NAME_IMAGE_URL, url)
+        if (imageURL != null)
+        {
+            for (url in imageURL) {
+                val contentValues = ContentValues()
+                contentValues.put(MemoStorage.MemoImageTable.COLUMN_NAME_MEMO_ID, memoId)
+                contentValues.put(MemoStorage.MemoImageTable.COLUMN_NAME_IMAGE_URL, url)
 
-            db.insert(MemoStorage.MemoImageTable.TABLE_NAME, null, contentValues)
+                db.insert(MemoStorage.MemoImageTable.TABLE_NAME, null, contentValues)
+            }
         }
     }
 

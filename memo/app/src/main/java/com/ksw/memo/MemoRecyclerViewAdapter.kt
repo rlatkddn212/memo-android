@@ -32,12 +32,14 @@ class MemoRecyclerViewAdapter(val memoList: List<MemoData>) :
         val memo = memoList[position]
         Log.d(TAG, "onBindViewHolder : ${memo} - $position")
 
-        Picasso.get()
-            .load(memo.imageURL!![0])
-            .error(R.drawable.placeholder)
-            .placeholder(R.drawable.placeholder)
-            .into(holder.thumbnail)
-
+        if (memo.thumbnail != null)
+        {
+            Picasso.get()
+                .load(memo.thumbnail)
+                .error(R.drawable.placeholder)
+                .placeholder(R.drawable.placeholder)
+                .into(holder.thumbnail)
+        }
         holder.title.text = memo.title
         holder.contents.text = memo.contents
     }
