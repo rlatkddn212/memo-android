@@ -3,9 +3,22 @@ package com.ksw.memo
 import android.os.Parcel
 import android.os.Parcelable
 
-data class MemoData(var title: String? = "", var contents : String?= "",
+/**
+ * 데이터 클래스
+ * 메모에 데이터를 저장한다.
+ *
+ * memoId : db에 저장시 자동 증가하는 unique id
+ * title : 메모의 제목
+ * contents : 메모의 내용
+ * thumbnail : 썸네일 이미지의 URL
+ * imageURL : 이미지 URL 리스트
+ */
+
+//-------------------------------------------------------------------------------------------------- MemoData
+data class MemoData(var memoId :Long = -1L, var title: String? = "", var contents : String?= "",
                     var thumbnail: String? = "", var imageURL: List<String>? = null) :Parcelable{
     constructor(parcel: Parcel) : this(
+        parcel.readLong(),
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
@@ -14,6 +27,7 @@ data class MemoData(var title: String? = "", var contents : String?= "",
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeLong(memoId)
         parcel.writeString(title)
         parcel.writeString(contents)
         parcel.writeString(thumbnail)
@@ -33,5 +47,4 @@ data class MemoData(var title: String? = "", var contents : String?= "",
             return arrayOfNulls(size)
         }
     }
-
 }

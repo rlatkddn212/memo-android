@@ -10,14 +10,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MemoEditActivity"
+            android:name=".activity.MemoEditActivity"
             android:label="@string/title_activity_memo_edit"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
-            android:name=".MemoDetailsActivity"
+            android:name=".activity.MemoDetailsActivity"
             android:label="@string/title_activity_memo_details"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

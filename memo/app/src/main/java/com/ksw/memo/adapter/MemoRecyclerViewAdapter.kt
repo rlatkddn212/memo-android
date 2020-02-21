@@ -1,4 +1,8 @@
-package com.ksw.memo
+/**
+ * 메모 리스트의 리사이클러 뷰
+ * Picasso 라이브러리를 사용하여 표시된다.
+ */
+package com.ksw.memo.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,14 +11,18 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.ksw.memo.MemoData
+import com.ksw.memo.R
 import com.squareup.picasso.Picasso
 
+//-------------------------------------------------------------------------------------------------- MemoRecyclerViewHolder
 class MemoRecyclerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     var title: TextView = view.findViewById(R.id.title)
     var contents : TextView = view.findViewById(R.id.contents)
     var thumbnail: ImageView = view.findViewById(R.id.thumbnail)
 }
 
+//-------------------------------------------------------------------------------------------------- MemoRecyclerViewAdapter
 class MemoRecyclerViewAdapter(val memoList: List<MemoData>) :
     RecyclerView.Adapter<MemoRecyclerViewHolder>() {
     private val TAG = "MemoRecyclerViewAdapter"
@@ -26,6 +34,12 @@ class MemoRecyclerViewAdapter(val memoList: List<MemoData>) :
 
     override fun getItemCount(): Int {
         return memoList.size
+    }
+
+    fun getMemo(position: Int): MemoData? {
+        return if (memoList.isNotEmpty()) {
+            memoList[position]
+        } else null
     }
 
     override fun onBindViewHolder(holder: MemoRecyclerViewHolder, position: Int) {

@@ -1,4 +1,4 @@
-package com.ksw.memo
+package com.ksw.memo.db
 
 import android.content.ContentValues
 import android.content.Context
@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
 
+//-------------------------------------------------------------------------------------------------- MemoStorage
 object MemoStorage {
     object MemoTable : BaseColumns {
         const val TABLE_NAME = "memo"
@@ -45,7 +46,10 @@ object MemoStorage {
  *  Memo 를 SQLite DB에 저장한다.
  */
 class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
-    : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION, errorHandler) {
+    : SQLiteOpenHelper(context,
+    DATABASE_NAME, null,
+    DATABASE_VERSION, errorHandler
+) {
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(MemoStorage.SQL_CREATE_MEMO)
         db.execSQL(MemoStorage.SQL_CREATE_MEMO_IMAGE)
@@ -85,10 +89,14 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
      */
     fun getAllMemo(): Cursor {
         val db = readableDatabase
-        val projection = arrayOf(BaseColumns._ID, MemoStorage.MemoTable.COLUMN_NAME_TITLE,
-            MemoStorage.MemoTable.COLUMN_NAME_CONTENTS, MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL)
+        val projection = arrayOf(BaseColumns._ID,
+            MemoStorage.MemoTable.COLUMN_NAME_TITLE,
+            MemoStorage.MemoTable.COLUMN_NAME_CONTENTS,
+            MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL
+        )
 
-        return db.query(MemoStorage.MemoTable.TABLE_NAME, projection,
+        return db.query(
+            MemoStorage.MemoTable.TABLE_NAME, projection,
             null, null, null, null, null)
     }
 
@@ -128,8 +136,7 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
     //---------------------------------------------------------------------------------------------- MemoImage
     fun addMemoImage(memoId: Long, imageURL: List<String>?) {
         val db = writableDatabase
-        if (imageURL != null)
-        {
+        if (imageURL != null) {
             for (url in imageURL) {
                 val contentValues = ContentValues()
                 contentValues.put(MemoStorage.MemoImageTable.COLUMN_NAME_MEMO_ID, memoId)
@@ -144,11 +151,14 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val db = readableDatabase
 
         val projection = arrayOf(BaseColumns._ID,
-            MemoStorage.MemoImageTable.COLUMN_NAME_MEMO_ID, MemoStorage.MemoImageTable.COLUMN_NAME_IMAGE_URL)
+            MemoStorage.MemoImageTable.COLUMN_NAME_MEMO_ID,
+            MemoStorage.MemoImageTable.COLUMN_NAME_IMAGE_URL
+        )
         val selection = "${MemoStorage.MemoImageTable.COLUMN_NAME_MEMO_ID} = ?"
         val selectionArgs = arrayOf(memoId.toString())
 
-        return db.query(MemoStorage.MemoImageTable.TABLE_NAME, projection,
+        return db.query(
+            MemoStorage.MemoImageTable.TABLE_NAME, projection,
             selection, selectionArgs, null, null, null)
     }
 
