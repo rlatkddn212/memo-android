@@ -16,7 +16,7 @@ import android.os.Parcelable
 
 //-------------------------------------------------------------------------------------------------- MemoData
 data class MemoData(var memoId :Long = -1L, var title: String? = "", var contents : String?= "",
-                    var thumbnail: String? = "", var imageURL: List<String>? = null) :Parcelable{
+                    var thumbnail: String? = "", var imageURL: MutableList<String>? = ArrayList()) :Parcelable{
     constructor(parcel: Parcel) : this(
         parcel.readLong(),
         parcel.readString(),

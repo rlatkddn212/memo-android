@@ -48,7 +48,7 @@ class MemoDetailsActivity : AppCompatActivity() {
         delete_button.setOnClickListener {
             val builder = AlertDialog.Builder(this)
             builder.setTitle(memo.title);
-            builder.setMessage("메모를 삭제하시겠습니까?");
+            builder.setMessage("메모를 삭제하시겠습니까?")
 
             builder
                 .setPositiveButton("확인") { dialogInterface, i ->

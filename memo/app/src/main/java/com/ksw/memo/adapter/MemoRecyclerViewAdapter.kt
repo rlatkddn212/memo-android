@@ -4,6 +4,7 @@
  */
 package com.ksw.memo.adapter
 
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +20,7 @@ import com.squareup.picasso.Picasso
 class MemoRecyclerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     var title: TextView = view.findViewById(R.id.title)
     var contents : TextView = view.findViewById(R.id.contents)
-    var thumbnail: ImageView = view.findViewById(R.id.thumbnail)
+    var memo_thumbnail: ImageView = view.findViewById(R.id.memo_thumbnail)
 }
 
 //-------------------------------------------------------------------------------------------------- MemoRecyclerViewAdapter
@@ -49,10 +50,10 @@ class MemoRecyclerViewAdapter(val memoList: List<MemoData>) :
         if (memo.thumbnail != null)
         {
             Picasso.get()
-                .load(memo.thumbnail)
-                .error(R.drawable.placeholder)
-                .placeholder(R.drawable.placeholder)
-                .into(holder.thumbnail)
+                .load(Uri.parse(memo.thumbnail))
+                .error(R.drawable.brokenimage)
+                .placeholder(R.drawable.brokenimage)
+                .into(holder.memo_thumbnail)
         }
         holder.title.text = memo.title
         holder.contents.text = memo.contents

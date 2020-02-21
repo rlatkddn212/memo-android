@@ -31,7 +31,7 @@
             android:inputType="textMultiLine" />
 
         <Button
-            android:id="@+id/imageURL"
+            android:id="@+id/url_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Button" />

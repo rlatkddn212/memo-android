@@ -24,12 +24,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.ksw.memo.MemoData
 import com.ksw.memo.db.MemoSQLHelper
 import com.ksw.memo.R
+import kotlinx.android.synthetic.main.activity_memo_details.*
 
 import kotlinx.android.synthetic.main.activity_memo_edit.*
+import kotlinx.android.synthetic.main.activity_memo_edit.toolbar
 import kotlinx.android.synthetic.main.content_memo_edit.*
 
 //-------------------------------------------------------------------------------------------------- MemoEditActivity
@@ -55,6 +59,23 @@ class MemoEditActivity : AppCompatActivity() {
 
         title_edit.setText(memo.title)
         contents_edit.setText(memo.contents)
+
+        url_button.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("URL 이미지 불러오기")
+            builder.setMessage("URL을 입력하세요.")
+
+            val editText = EditText(this)
+            builder.setView(editText)
+            builder
+                .setPositiveButton("확인") { dialogInterface, i ->
+                    memo.imageURL?.add(editText.getText().toString())
+                }
+                .setNegativeButton("취소") { dialogInterface, i ->
+
+                }
+                .show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -78,7 +99,7 @@ class MemoEditActivity : AppCompatActivity() {
                 else {
                     memo.title = title_edit?.text.toString()
                     memo.contents = contents_edit?.text.toString()
-                    dbHelper.updateMemo(memo.memoId, memo.title.toString(), memo.contents.toString(), null)
+                    dbHelper.updateMemo(memo.memoId, memo.title.toString(), memo.contents.toString(), memo.imageURL)
                     val intent = Intent()
                     intent.putExtra("MEMO_DATA", memo)
                     setResult(RESULT_OK, intent)

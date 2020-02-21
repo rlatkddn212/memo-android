@@ -24,9 +24,8 @@
         android:layout_weight="1"
         android:text="TextView" />
 
-
     <ImageView
-        android:id="@+id/thumbnail"
+        android:id="@+id/memo_thumbnail"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
