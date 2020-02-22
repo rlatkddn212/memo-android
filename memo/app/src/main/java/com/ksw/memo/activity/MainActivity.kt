@@ -25,12 +25,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ksw.memo.*
 import com.ksw.memo.adapter.MemoRecyclerViewAdapter
 import com.ksw.memo.db.MemoSQLHelper
-import com.ksw.memo.listener.RecyclerMemoItemClickListener
+import com.ksw.memo.listener.RecyclerItemClickListener
 import kotlinx.android.synthetic.main.content_main.*
 
 //-------------------------------------------------------------------------------------------------- MainActivity
 class MainActivity : AppCompatActivity(),
-    RecyclerMemoItemClickListener.OnRecyclerClickListener {
+    RecyclerItemClickListener.OnRecyclerClickListener {
 
     private val TAG = "MainActivity"
     var memolist :MutableList<MemoData> = ArrayList()
@@ -46,17 +46,16 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         Log.d(TAG, "onCreate called")
 
+        // 리사이클러 뷰 연결
         recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.addOnItemTouchListener(
-            RecyclerMemoItemClickListener(
-                this,
-                recycler_view,
-                this
-            )
+            RecyclerItemClickListener(this, recycler_view, this)
         )
+
         memoAdapter = MemoRecyclerViewAdapter(memolist)
         recycler_view.adapter = memoAdapter
 
+        // 메모 리스트 갱신
         updateMemoList()
     }
 

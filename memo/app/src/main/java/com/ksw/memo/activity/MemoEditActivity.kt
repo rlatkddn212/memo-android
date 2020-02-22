@@ -17,42 +17,54 @@
 
 package com.ksw.memo.activity
 
-import android.app.Activity
 import android.content.Intent
 import android.database.DatabaseErrorHandler
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider.getUriForFile
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ksw.memo.MemoData
-import com.ksw.memo.db.MemoSQLHelper
 import com.ksw.memo.R
-import kotlinx.android.synthetic.main.activity_memo_details.*
-
+import com.ksw.memo.adapter.ImageEditRecyclerViewAdapter
+import com.ksw.memo.db.MemoSQLHelper
+import com.ksw.memo.listener.RecyclerItemClickListener
 import kotlinx.android.synthetic.main.activity_memo_edit.*
-import kotlinx.android.synthetic.main.activity_memo_edit.toolbar
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.content_memo_edit.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.util.*
+
 
 //-------------------------------------------------------------------------------------------------- MemoEditActivity
-class MemoEditActivity : AppCompatActivity() {
+class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecyclerClickListener{
     private val TAG = "MemoEditActivity"
     val dbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
         Log.e(TAG, "DB Error")
     })
     var bNewEdit : Boolean = true
     lateinit var memo : MemoData
+    lateinit var imageFile : File
+    var imageList :MutableList<String> = ArrayList()
+    lateinit var imageAdapter : ImageEditRecyclerViewAdapter
 
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memo_edit)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        // setup intent data
         memo = intent.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
-
         if (memo.memoId != -1L) {
             bNewEdit = false
         }
@@ -60,6 +72,22 @@ class MemoEditActivity : AppCompatActivity() {
         title_edit.setText(memo.title)
         contents_edit.setText(memo.contents)
 
+        // 리사이클러 뷰 연결
+        recycler_view.layoutManager = LinearLayoutManager(this)
+        recycler_view.addOnItemTouchListener(
+            RecyclerItemClickListener(this, recycler_view, this)
+        )
+
+        imageAdapter = ImageEditRecyclerViewAdapter(imageList)
+        recycler_view.adapter = imageAdapter
+
+        for (image in memo.imageURL!!) {
+            imageList.add(image)
+        }
+
+        imageAdapter.notifyDataSetChanged()
+
+        // url 버튼, url 입력 창 생성, 확인 취소 버튼 생성, imageURL List에 추가
         url_button.setOnClickListener {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("URL 이미지 불러오기")
@@ -70,11 +98,78 @@ class MemoEditActivity : AppCompatActivity() {
             builder
                 .setPositiveButton("확인") { dialogInterface, i ->
                     memo.imageURL?.add(editText.getText().toString())
+                    imageList.add(editText.getText().toString())
+                    imageAdapter.notifyDataSetChanged()
                 }
                 .setNegativeButton("취소") { dialogInterface, i ->
 
                 }
                 .show()
+        }
+
+        // 카메라 버튼, 저장될 image 위치 지정, 카메라에서 이미지 촬영
+        photo_button.setOnClickListener {
+            val intent = Intent()
+            intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE)
+
+            val imageFolder = getFilesDir()
+            imageFile = File(imageFolder, "memo_" + UUID.randomUUID() + ".jpg")
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N){
+                val photoUri = getUriForFile(this, "com.ksw.memo", imageFile)
+                Log.d(TAG, "$photoUri")
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            }else {
+                val photoUri: Uri = Uri.fromFile(imageFile)
+                Log.d(TAG, "$photoUri")
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            }
+
+            startActivityForResult(intent, 2);
+        }
+
+        // 갤러리에서 이미지 가져오기
+        gallery_button.setOnClickListener {
+            val intent = Intent()
+            intent.type = "image/*"
+            intent.action = Intent.ACTION_GET_CONTENT
+
+            startActivityForResult(intent, 1)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d(TAG, "onActivityResult $requestCode, $resultCode $data")
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                // 파일 복사해서 가져온다.
+                val imageFolder = getFilesDir()
+                imageFile = File(imageFolder, "memo_" + UUID.randomUUID() + ".jpg")
+
+                val inputStream: InputStream? = contentResolver
+                    .openInputStream(data?.data!!)
+                val fileOutputStream = FileOutputStream(imageFile)
+                val buffer = ByteArray(1024)
+                var bytesRead = 0
+
+                while (inputStream?.read(buffer).also({  bytesRead = it!! }) != -1) {
+                    fileOutputStream.write(buffer, 0, bytesRead)
+                }
+
+                fileOutputStream.close()
+                inputStream?.close()
+
+                imageList.add("file://$imageFile")
+                imageAdapter.notifyDataSetChanged()
+            }
+        }
+        else if (requestCode == 2) {
+            if (resultCode == RESULT_OK) {
+                // 리사이클러 뷰에 추가
+                imageList.add("file://$imageFile")
+                imageAdapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -92,8 +187,13 @@ class MemoEditActivity : AppCompatActivity() {
                 true
             }
             R.id.add_memo -> {
+                memo.imageURL?.clear()
+                for (image in imageList) {
+                    memo.imageURL?.add(image)
+                }
+
                 if (bNewEdit) {
-                    dbHelper.addMemo(title_edit?.text.toString(), contents_edit?.text.toString(), null)
+                    dbHelper.addMemo(title_edit?.text.toString(), contents_edit?.text.toString(), memo.imageURL)
                     setResult(RESULT_OK)
                 }
                 else {
@@ -110,5 +210,23 @@ class MemoEditActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onItemClick(view: View, position: Int) {
+        // 제거할지?
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("이미지 삭제")
+        builder.setMessage("이미지를 삭제하시겠습니까?")
+
+        builder
+            .setPositiveButton("확인") { dialogInterface, i ->
+                memo.imageURL?.removeAt(position)
+                imageList.removeAt(position)
+                imageAdapter.notifyDataSetChanged()
+            }
+            .setNegativeButton("취소") { dialogInterface, i ->
+
+            }
+            .show()
     }
 }

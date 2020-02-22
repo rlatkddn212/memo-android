@@ -11,6 +11,7 @@
 package com.ksw.memo.activity
 
 import android.content.Intent
+import android.database.Cursor
 import android.database.DatabaseErrorHandler
 import android.os.Bundle
 import android.util.Log
@@ -18,12 +19,15 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ksw.memo.MemoData
 import com.ksw.memo.db.MemoSQLHelper
 import com.ksw.memo.R
+import com.ksw.memo.adapter.ImageDetailsRecyclerViewAdapter
 
 import kotlinx.android.synthetic.main.activity_memo_details.*
 import kotlinx.android.synthetic.main.content_memo_details.*
+import java.util.ArrayList
 
 //-------------------------------------------------------------------------------------------------- MemoDetailsActivity
 class MemoDetailsActivity : AppCompatActivity() {
@@ -33,6 +37,9 @@ class MemoDetailsActivity : AppCompatActivity() {
     })
     lateinit var memo : MemoData
     val changeCode : Int = 101
+
+    var imageList :MutableList<String> = ArrayList()
+    lateinit var imageAdapter : ImageDetailsRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +51,12 @@ class MemoDetailsActivity : AppCompatActivity() {
 
         title_details.text = memo.title
         contents_details.text = memo.contents
+
+        // 리사이클러 뷰 연결
+        details_recycler_view.layoutManager = LinearLayoutManager(this)
+        imageAdapter = ImageDetailsRecyclerViewAdapter(imageList)
+        details_recycler_view.adapter = imageAdapter
+        updateImageList()
 
         delete_button.setOnClickListener {
             val builder = AlertDialog.Builder(this)
@@ -65,6 +78,23 @@ class MemoDetailsActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateImageList() {
+        val cursor : Cursor = dbHelper.getAllMemoImage(memo.memoId)
+        imageList.clear()
+        memo.imageURL?.clear()
+        if (cursor.moveToFirst()) {
+            do {
+                imageList.add(
+                    cursor.getString(2)
+                )
+                memo.imageURL?.add( cursor.getString(2))
+
+            } while (cursor.moveToNext())
+        }
+
+        imageAdapter.notifyDataSetChanged()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(TAG, "onActivityResult $requestCode, $resultCode")
@@ -73,6 +103,8 @@ class MemoDetailsActivity : AppCompatActivity() {
                 memo = data?.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
                 title_details.text = memo.title
                 contents_details.text = memo.contents
+
+                updateImageList()
             }
         }
     }

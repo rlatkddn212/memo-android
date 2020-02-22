@@ -76,10 +76,14 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val contentValues = ContentValues()
         contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_TITLE, title)
         contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_CONTENTS, contents)
-        contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
-        val db = writableDatabase
+        if (!imageURL?.isEmpty()!!){
+            contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
+        }else {
+            contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, "")
+        }
 
-       val memoId = db.insert(MemoStorage.MemoTable.TABLE_NAME, null, contentValues)
+        val db = writableDatabase
+        val memoId = db.insert(MemoStorage.MemoTable.TABLE_NAME, null, contentValues)
         addMemoImage(memoId, imageURL)
     }
 
@@ -119,12 +123,17 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val values = ContentValues().apply {
             put(MemoStorage.MemoTable.COLUMN_NAME_TITLE, title)
             put(MemoStorage.MemoTable.COLUMN_NAME_CONTENTS, contents)
-            put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
+            if (!imageURL?.isEmpty()!!) {
+                put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
+            }
+            else{
+                put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, "")
+            }
         }
 
         val selection = "${BaseColumns._ID} = ?"
         val selectionArgs = arrayOf(memoId.toString())
-        db.update(MemoStorage.MemoTable.TABLE_NAME, values, selection,  selectionArgs)
+        db.update(MemoStorage.MemoTable.TABLE_NAME, values, selection, selectionArgs)
 
         // updateMemoImage(memoId)
         // TODO : 업데이트 할 때 memo ID 관련 모든 URL을 지우고 다시 추가 하고 있음

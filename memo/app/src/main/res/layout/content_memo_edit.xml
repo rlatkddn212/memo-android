@@ -24,7 +24,7 @@
         <EditText
             android:id="@+id/contents_edit"
             android:layout_width="match_parent"
-            android:layout_height="384dp"
+            android:layout_height="173dp"
             android:ems="10"
             android:gravity="start|top"
             android:hint="내용"
@@ -34,7 +34,19 @@
             android:id="@+id/url_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Button" />
+            android:text="url" />
+
+        <Button
+            android:id="@+id/gallery_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="갤러리" />
+
+        <Button
+            android:id="@+id/photo_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="photo" />
 
         <include layout="@layout/content_main" />
 
