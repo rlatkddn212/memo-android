@@ -65,11 +65,11 @@ class MemoDetailsActivity : AppCompatActivity() {
 
         delete_button.setOnClickListener {
             val builder = AlertDialog.Builder(this)
-            builder.setTitle(_memo.title);
-            builder.setMessage("메모를 삭제하시겠습니까?")
+            builder.setTitle(_memo.title)
+            builder.setMessage(R.string.memo_delete_question_memo_detail)
 
             builder
-                .setPositiveButton("확인") { dialogInterface, i ->
+                .setPositiveButton(R.string.dialog_ok) { dialogInterface, i ->
                     // 파일 삭제
                     for (removeImage in _imageList) {
                         if (removeImage.startsWith("http", 0)) continue
@@ -84,7 +84,7 @@ class MemoDetailsActivity : AppCompatActivity() {
                     setResult(RESULT_OK, intent)
                     finish()
                 }
-                .setNegativeButton("취소") { dialogInterface, i ->
+                .setNegativeButton(R.string.dialog_cancel) { dialogInterface, i ->
 
                 }
                 .show()

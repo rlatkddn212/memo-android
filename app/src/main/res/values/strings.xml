@@ -4,6 +4,8 @@
     <string name="title_activity_memo_details">메모 상세 보기</string>
     <string name="title_activity_memo_edit">메모 편집 및 작성</string>
 
+    <string name="memo_delete_title_memo_detail">메모 삭제</string>
+    <string name="memo_delete_question_memo_detail">메모 삭제</string>
     <string name="image_delete_title_memo_edit">이미지 삭제</string>
     <string name="image_delete_question_memo_edit">이미지를 삭제하시겠습니까?</string>
     <string name="image_url_title_memo_edit">URL 이미지 불러오기</string>

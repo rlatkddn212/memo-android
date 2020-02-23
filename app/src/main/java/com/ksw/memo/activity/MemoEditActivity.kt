@@ -207,7 +207,6 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(TAG, "onOptionsItemSelected called")
-
         return when (item.itemId) {
             android.R.id.home -> {
                 val addList = getAddedJPGFile()
