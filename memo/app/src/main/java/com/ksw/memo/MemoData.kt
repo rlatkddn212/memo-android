@@ -13,7 +13,6 @@ import android.os.Parcelable
  * thumbnail : 썸네일 이미지의 URL
  * imageURL : 이미지 URL 리스트
  */
-
 //-------------------------------------------------------------------------------------------------- MemoData
 data class MemoData(var memoId :Long = -1L, var title: String? = "", var contents : String?= "",
                     var thumbnail: String? = "", var imageURL: MutableList<String>? = ArrayList()) :Parcelable{

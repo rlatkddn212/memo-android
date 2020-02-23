@@ -33,11 +33,11 @@ class MainActivity : AppCompatActivity(),
     RecyclerItemClickListener.OnRecyclerClickListener {
 
     private val TAG = "MainActivity"
-    var memolist :MutableList<MemoData> = ArrayList()
-    lateinit var memoAdapter : MemoRecyclerViewAdapter
-    val changeCode : Int = 100
+    private var mMemolist:MutableList<MemoData> = ArrayList()
+    private lateinit var mMemoAdapter: MemoRecyclerViewAdapter
+    private val changeCode : Int = 100
 
-    val dbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
+    val mDbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
         Log.e(TAG, "DB Error")
     })
 
@@ -52,19 +52,21 @@ class MainActivity : AppCompatActivity(),
             RecyclerItemClickListener(this, recycler_view, this)
         )
 
-        memoAdapter = MemoRecyclerViewAdapter(memolist)
-        recycler_view.adapter = memoAdapter
+        mMemoAdapter = MemoRecyclerViewAdapter(mMemolist)
+        recycler_view.adapter = mMemoAdapter
 
-        // 메모 리스트 갱신
         updateMemoList()
     }
 
+    /**
+     * 메모 리스트 갱신
+     */
     private fun updateMemoList() {
-        val cursor :Cursor = dbHelper.getAllMemo()
-        memolist.clear()
+        val cursor :Cursor = mDbHelper.getAllMemo()
+        mMemolist.clear()
         if (cursor.moveToFirst()) {
             do {
-                memolist.add(
+                mMemolist.add(
                     MemoData(
                         cursor.getLong(0),
                         cursor.getString(1),
@@ -76,7 +78,7 @@ class MainActivity : AppCompatActivity(),
             } while (cursor.moveToNext())
         }
 
-        memoAdapter.notifyDataSetChanged()
+        mMemoAdapter.notifyDataSetChanged()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -114,7 +116,7 @@ class MainActivity : AppCompatActivity(),
      */
     override fun onItemClick(view: View, position: Int) {
         Log.d(TAG, "onItemClick")
-        val memo = memoAdapter.getMemo(position)
+        val memo = mMemoAdapter.getMemo(position)
         if(memo != null)
         {
             val intent = Intent(this, MemoDetailsActivity::class.java)

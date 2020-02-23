@@ -8,47 +8,86 @@
     tools:context=".activity.MemoEditActivity"
     tools:showIn="@layout/activity_memo_edit">
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
+        android:id="@+id/edit_card_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        app:contentPadding="8dp"
 
-        <EditText
-            android:id="@+id/title_edit"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintBottom_toTopOf="@+id/image_add_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="제목"
-            android:inputType="textPersonName" />
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:orientation="vertical">
+            <EditText
+                android:id="@+id/title_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="제목"
+                android:inputType="textPersonName" />
 
-        <EditText
-            android:id="@+id/contents_edit"
-            android:layout_width="match_parent"
-            android:layout_height="173dp"
-            android:ems="10"
-            android:gravity="start|top"
-            android:hint="내용"
-            android:inputType="textMultiLine" />
+            <EditText
+                android:id="@+id/contents_edit"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:ems="10"
+                android:gravity="start|top"
+                android:hint="내용"
+                android:inputType="textMultiLine" />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/image_add_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintBottom_toTopOf="@+id/edit_recycler_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edit_card_view"
+        >
 
         <Button
             android:id="@+id/url_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="url" />
 
         <Button
             android:id="@+id/gallery_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="갤러리" />
 
         <Button
             android:id="@+id/photo_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="photo" />
 
-        <include layout="@layout/content_main" />
-
     </LinearLayout>
+
+    <include
+        android:id="@+id/edit_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        layout="@layout/content_main"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_add_layout"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,6 +13,7 @@ package com.ksw.memo.activity
 import android.content.Intent
 import android.database.Cursor
 import android.database.DatabaseErrorHandler
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -27,45 +28,56 @@ import com.ksw.memo.adapter.ImageDetailsRecyclerViewAdapter
 
 import kotlinx.android.synthetic.main.activity_memo_details.*
 import kotlinx.android.synthetic.main.content_memo_details.*
+import java.io.File
 import java.util.ArrayList
 
 //-------------------------------------------------------------------------------------------------- MemoDetailsActivity
 class MemoDetailsActivity : AppCompatActivity() {
     private val TAG = "MemoDetailsActivity"
-    val dbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
+    private val mDbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
         Log.e(TAG, "DB Error")
     })
-    lateinit var memo : MemoData
-    val changeCode : Int = 101
+    private lateinit var mMemo: MemoData
+    private val ChangeCode: Int = 101
 
-    var imageList :MutableList<String> = ArrayList()
-    lateinit var imageAdapter : ImageDetailsRecyclerViewAdapter
+    private var mImageList:MutableList<String> = ArrayList()
+    private lateinit var mImageAdapter: ImageDetailsRecyclerViewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memo_details)
-        setSupportActionBar(toolbar)
+        // setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        memo = intent.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
+        mMemo = intent.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
 
-        title_details.text = memo.title
-        contents_details.text = memo.contents
+        title_details.text = mMemo.title
+        contents_details.text = mMemo.contents
 
         // 리사이클러 뷰 연결
         details_recycler_view.layoutManager = LinearLayoutManager(this)
-        imageAdapter = ImageDetailsRecyclerViewAdapter(imageList)
-        details_recycler_view.adapter = imageAdapter
+        mImageAdapter = ImageDetailsRecyclerViewAdapter(mImageList)
+        details_recycler_view.adapter = mImageAdapter
         updateImageList()
 
         delete_button.setOnClickListener {
             val builder = AlertDialog.Builder(this)
-            builder.setTitle(memo.title);
+            builder.setTitle(mMemo.title);
             builder.setMessage("메모를 삭제하시겠습니까?")
 
             builder
                 .setPositiveButton("확인") { dialogInterface, i ->
-                    dbHelper.deleteMemo(memo.memoId)
+                    // 파일 삭제
+                    for(removeImage in mImageList) {
+                        if (removeImage.startsWith("http", 0)) continue
+                        val deleteFile = File(Uri.parse(removeImage).path)
+                        if (deleteFile.exists()) {
+                            Log.d(TAG, "delete file $deleteFile")
+                            deleteFile.delete()
+                        }
+                    }
+
+                    mDbHelper.deleteMemo(mMemo.memoId)
                     val intent = Intent()
                     // intent.putExtra("MEMO_DATA", memo)
                     setResult(RESULT_OK, intent)
@@ -79,30 +91,30 @@ class MemoDetailsActivity : AppCompatActivity() {
     }
 
     private fun updateImageList() {
-        val cursor : Cursor = dbHelper.getAllMemoImage(memo.memoId)
-        imageList.clear()
-        memo.imageURL?.clear()
+        val cursor : Cursor = mDbHelper.getAllMemoImage(mMemo.memoId)
+        mImageList.clear()
+        mMemo.imageURL?.clear()
         if (cursor.moveToFirst()) {
             do {
-                imageList.add(
+                mImageList.add(
                     cursor.getString(2)
                 )
-                memo.imageURL?.add( cursor.getString(2))
+                mMemo.imageURL?.add( cursor.getString(2))
 
             } while (cursor.moveToNext())
         }
 
-        imageAdapter.notifyDataSetChanged()
+        mImageAdapter.notifyDataSetChanged()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(TAG, "onActivityResult $requestCode, $resultCode")
-        if (requestCode == changeCode) {
+        if (requestCode == ChangeCode) {
             if (resultCode == RESULT_OK) {
-                memo = data?.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
-                title_details.text = memo.title
-                contents_details.text = memo.contents
+                mMemo = data?.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
+                title_details.text = mMemo.title
+                contents_details.text = mMemo.contents
 
                 updateImageList()
             }
@@ -110,24 +122,25 @@ class MemoDetailsActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
+        menuInflater.inflate(R.menu.menu_details, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         Log.d(TAG, "onOptionsItemSelected called")
-
         return when (item.itemId) {
             android.R.id.home -> {
                 val intent = Intent()
                 setResult(RESULT_OK, intent)
                 finish()
+
                 true
             }
-            R.id.add_memo -> {
+            R.id.edit_memo -> {
                 val intent = Intent(this, MemoEditActivity::class.java)
-                intent.putExtra("MEMO_DATA", memo)
-                startActivityForResult(intent, changeCode)
+                intent.putExtra("MEMO_DATA", mMemo)
+                startActivityForResult(intent, ChangeCode)
+
                 true
             }
             else -> super.onOptionsItemSelected(item)

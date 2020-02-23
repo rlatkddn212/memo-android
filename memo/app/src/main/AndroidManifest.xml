@@ -24,11 +24,10 @@
         <activity
             android:name=".activity.MemoEditActivity"
             android:label="@string/title_activity_memo_edit"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:windowSoftInputMode="adjustNothing"></activity>
         <activity
             android:name=".activity.MemoDetailsActivity"
-            android:label="@string/title_activity_memo_details"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/title_activity_memo_details"/>
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
