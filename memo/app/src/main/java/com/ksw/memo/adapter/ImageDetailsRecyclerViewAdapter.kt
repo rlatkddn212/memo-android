@@ -21,6 +21,7 @@ class ImageDetailsRecyclerViewHolder(view: View) : RecyclerView.ViewHolder(view)
 class ImageDetailsRecyclerViewAdapter (val imageList: List<String>)
     : RecyclerView.Adapter<ImageDetailsRecyclerViewHolder>() {
     private val TAG = "ImageDetailsRecycler"
+    
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageDetailsRecyclerViewHolder {
         Log.d(TAG, "onCreateViewHolder called")
         val view = LayoutInflater.from(parent.context).inflate(R.layout.memo_image_details, parent, false)
@@ -29,12 +30,6 @@ class ImageDetailsRecyclerViewAdapter (val imageList: List<String>)
 
     override fun getItemCount(): Int {
         return imageList.size
-    }
-
-    fun getMemo(position: Int): String? {
-        return if (imageList.isNotEmpty()) {
-            imageList[position]
-        } else null
     }
 
     override fun onBindViewHolder(holder: ImageDetailsRecyclerViewHolder, position: Int) {

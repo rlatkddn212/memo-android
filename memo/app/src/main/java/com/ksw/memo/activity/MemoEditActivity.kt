@@ -36,17 +36,18 @@ import com.ksw.memo.R
 import com.ksw.memo.adapter.ImageEditRecyclerViewAdapter
 import com.ksw.memo.db.MemoSQLHelper
 import com.ksw.memo.listener.RecyclerItemClickListener
-import kotlinx.android.synthetic.main.activity_memo_edit.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.content_memo_edit.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.text.SimpleDateFormat
 import java.util.*
 
-
+const val GALLERY_IMAGE_CODE = 1
+const val PHOTO_IMAGE_CODE = 2
 //-------------------------------------------------------------------------------------------------- MemoEditActivity
-class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecyclerClickListener{
+class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecyclerClickListener {
     private val TAG = "MemoEditActivity"
     private val mDbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
         Log.e(TAG, "DB Error")
@@ -54,19 +55,16 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
     private var mIsNewEdit: Boolean = true
     lateinit var mMemo: MemoData
     private lateinit var mImageFile: File
-    private var mImageList:MutableList<String> = ArrayList()
-    private var mRemoveList:MutableList<String> = ArrayList()
+    private var mImageList: MutableList<String> = ArrayList()
+    private var mRemoveList: MutableList<String> = ArrayList()
     private lateinit var mImageAdapter: ImageEditRecyclerViewAdapter
-
-    private val GALLERY_IMAGE_CODE = 1
-    private val PHOTO_IMAGE_CODE = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memo_edit)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // setup intent data
+        // 인텐트로 전달 받은 데이터 적용
         mMemo = intent.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
         if (mMemo.memoId != -1L) {
             mIsNewEdit = false
@@ -74,6 +72,7 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
 
         title_edit.setText(mMemo.title)
         contents_edit.setText(mMemo.contents)
+
 
         // 리사이클러 뷰 연결
         recycler_view.layoutManager = LinearLayoutManager(this)
@@ -121,24 +120,32 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
 
         // 카메라 버튼, 저장될 image 위치 지정, 카메라에서 이미지 촬영
         photo_button.setOnClickListener {
-            val intent = Intent()
-            intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE)
+            Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+                takePictureIntent.resolveActivity(packageManager)?.also {
+                    mImageFile = createImageFile()
+                    mImageFile?.also {
+                        val photoUri: Uri = getUriForFile(
+                            this,
+                            "com.ksw.memo",
+                            it
+                        )
 
-            val imageFolder = getFilesDir()
-            mImageFile = File(imageFolder, "memo_" + UUID.randomUUID() + ".jpg")
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                val photoUri = getUriForFile(this, "com.ksw.memo", mImageFile)
-                Log.d(TAG, "$photoUri")
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-            }else {
-                val photoUri: Uri = Uri.fromFile(mImageFile)
-                Log.d(TAG, "$photoUri")
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                        startActivityForResult(takePictureIntent, PHOTO_IMAGE_CODE)
+                    }
+                }
             }
-
-            startActivityForResult(intent, PHOTO_IMAGE_CODE);
         }
+    }
+
+    /**
+     * 이미지 저장 파일 생성
+     * @return 저장 파일
+     */
+    private fun createImageFile(): File {
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir = filesDir
+        return File.createTempFile("memo_${timeStamp}_${UUID.randomUUID()}", ".jpg", storageDir)
     }
 
     /**
@@ -150,8 +157,9 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
         if (requestCode == GALLERY_IMAGE_CODE) {
             if (resultCode == RESULT_OK) {
                 // 파일 복사해서 가져온다.
-                val imageFolder = getFilesDir()
-                mImageFile = File(imageFolder, "memo_" + UUID.randomUUID() + ".jpg")
+                val imageFolder = filesDir
+                val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+                mImageFile = File(imageFolder, "memo_${timeStamp}_${UUID.randomUUID()}.jpg")
 
                 val inputStream: InputStream? = contentResolver
                     .openInputStream(data?.data!!)
@@ -159,7 +167,7 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
                 val buffer = ByteArray(1024)
                 var bytesRead = 0
 
-                while (inputStream?.read(buffer).also({  bytesRead = it!! }) != -1) {
+                while (inputStream?.read(buffer).also({ bytesRead = it!! }) != -1) {
                     fileOutputStream.write(buffer, 0, bytesRead)
                 }
 
@@ -169,8 +177,7 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
                 mImageList.add("file://$mImageFile")
                 mImageAdapter.notifyDataSetChanged()
             }
-        }
-        else if (requestCode == PHOTO_IMAGE_CODE) {
+        } else if (requestCode == PHOTO_IMAGE_CODE) {
             if (resultCode == RESULT_OK) {
                 // 리사이클러 뷰에 추가
                 mImageList.add("file://$mImageFile")
@@ -197,7 +204,7 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
             }
             R.id.save_memo -> {
                 // 파일 삭제
-                for(removeImage in mRemoveList) {
+                for (removeImage in mRemoveList) {
                     val deleteFile = File(Uri.parse(removeImage).path)
                     if (deleteFile.exists()) {
                         Log.d(TAG, "delete file $deleteFile")
@@ -206,13 +213,21 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
                 }
 
                 if (mIsNewEdit) {
-                    mDbHelper.addMemo(title_edit?.text.toString(), contents_edit?.text.toString(), mImageList)
+                    mDbHelper.addMemo(
+                        title_edit?.text.toString(),
+                        contents_edit?.text.toString(),
+                        mImageList
+                    )
                     setResult(RESULT_OK)
-                }
-                else {
+                } else {
                     mMemo.title = title_edit?.text.toString()
                     mMemo.contents = contents_edit?.text.toString()
-                    mDbHelper.updateMemo(mMemo.memoId, mMemo.title.toString(), mMemo.contents.toString(), mImageList)
+                    mDbHelper.updateMemo(
+                        mMemo.memoId,
+                        mMemo.title.toString(),
+                        mMemo.contents.toString(),
+                        mImageList
+                    )
                     val intent = Intent()
                     intent.putExtra("MEMO_DATA", mMemo)
                     setResult(RESULT_OK, intent)
@@ -230,15 +245,15 @@ class MemoEditActivity : AppCompatActivity(), RecyclerItemClickListener.OnRecycl
      */
     override fun onItemClick(view: View, position: Int) {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("이미지 삭제")
-        builder.setMessage("이미지를 삭제하시겠습니까?")
+        builder.setTitle(R.string.image_delete_title_memo_edit)
+        builder.setMessage(R.string.image_delete_question_memo_edit)
 
         builder
             .setPositiveButton("확인") { dialogInterface, i ->
-                if (! mImageList[position].startsWith("http", 0)){
+                if (!mImageList[position].startsWith("http", 0)) {
                     mRemoveList.add(mImageList[position])
                 }
-                //memo.imageURL?.removeAt(position)
+
                 mImageList.removeAt(position)
                 mImageAdapter.notifyDataSetChanged()
             }

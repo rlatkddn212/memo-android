@@ -20,6 +20,7 @@ class ImageEditRecyclerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 //-------------------------------------------------------------------------------------------------- ImageEditRecyclerViewAdapter
 class ImageEditRecyclerViewAdapter (val imageList: List<String>): RecyclerView.Adapter<ImageEditRecyclerViewHolder>() {
     private val TAG = "ImageEditRecyclerView"
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageEditRecyclerViewHolder {
         Log.d(TAG, "onCreateViewHolder called")
         val view = LayoutInflater.from(parent.context).inflate(R.layout.memo_image_edit, parent, false)
@@ -28,12 +29,6 @@ class ImageEditRecyclerViewAdapter (val imageList: List<String>): RecyclerView.A
 
     override fun getItemCount(): Int {
         return imageList.size
-    }
-
-    fun getMemo(position: Int): String? {
-        return if (imageList.isNotEmpty()) {
-            imageList[position]
-        } else null
     }
 
     override fun onBindViewHolder(holder: ImageEditRecyclerViewHolder, position: Int) {

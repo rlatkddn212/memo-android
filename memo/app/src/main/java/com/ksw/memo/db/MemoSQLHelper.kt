@@ -68,9 +68,9 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
     //---------------------------------------------------------------------------------------------- Memo
     /**
      * 메모를 추가한다.
-     * title : 메모 제목
-     * contents : 메모 내용
-     * return : 저장된 key id
+     * @param title 메모 제목
+     * @param contents 메모 내용
+     * @return  저장된 key id
      */
     fun addMemo(title: String, contents: String, imageURL: List<String>?) {
         val contentValues = ContentValues()
@@ -89,7 +89,7 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
 
     /**
      * 모든 메모 내용을 가져온다.
-     * return : select 문에 대한 커서
+     * @return select 문에 대한 커서
      */
     fun getAllMemo(): Cursor {
         val db = readableDatabase
@@ -111,7 +111,7 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val selectionArgs = arrayOf(memoId.toString())
         // Issue SQL statement.
         val deletedRows = db.delete(MemoStorage.MemoTable.TABLE_NAME, selection, selectionArgs)
-        deleteMemoImage(memoId);
+        deleteMemoImage(memoId)
     }
 
     /**
@@ -135,8 +135,6 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val selectionArgs = arrayOf(memoId.toString())
         db.update(MemoStorage.MemoTable.TABLE_NAME, values, selection, selectionArgs)
 
-        // updateMemoImage(memoId)
-        // TODO : 업데이트 할 때 memo ID 관련 모든 URL을 지우고 다시 추가 하고 있음
         deleteMemoImage(memoId)
         addMemoImage(memoId, imageURL)
 
@@ -180,6 +178,6 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
 
     companion object {
         const val DATABASE_VERSION = 1
-        const val DATABASE_NAME = "MemoStorage2.db"
+        const val DATABASE_NAME = "MemoStorage.db"
     }
 }

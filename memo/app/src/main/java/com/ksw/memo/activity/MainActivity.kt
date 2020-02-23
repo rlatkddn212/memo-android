@@ -15,27 +15,28 @@ package com.ksw.memo.activity
 import android.content.Intent
 import android.database.Cursor
 import android.database.DatabaseErrorHandler
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ksw.memo.*
+import com.ksw.memo.MemoData
+import com.ksw.memo.R
 import com.ksw.memo.adapter.MemoRecyclerViewAdapter
 import com.ksw.memo.db.MemoSQLHelper
 import com.ksw.memo.listener.RecyclerItemClickListener
 import kotlinx.android.synthetic.main.content_main.*
 
+const val INTENT_CODE: Int = 1
+
 //-------------------------------------------------------------------------------------------------- MainActivity
 class MainActivity : AppCompatActivity(),
     RecyclerItemClickListener.OnRecyclerClickListener {
-
     private val TAG = "MainActivity"
-    private var mMemolist:MutableList<MemoData> = ArrayList()
+    private var mMemolist: MutableList<MemoData> = ArrayList()
     private lateinit var mMemoAdapter: MemoRecyclerViewAdapter
-    private val changeCode : Int = 100
 
     val mDbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
         Log.e(TAG, "DB Error")
@@ -58,11 +59,16 @@ class MainActivity : AppCompatActivity(),
         updateMemoList()
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "Start!!!")
+    }
+
     /**
      * 메모 리스트 갱신
      */
     private fun updateMemoList() {
-        val cursor :Cursor = mDbHelper.getAllMemo()
+        val cursor: Cursor = mDbHelper.getAllMemo()
         mMemolist.clear()
         if (cursor.moveToFirst()) {
             do {
@@ -84,7 +90,7 @@ class MainActivity : AppCompatActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(TAG, "onActivityResult $requestCode, $resultCode")
-        if (requestCode == changeCode) {
+        if (requestCode == INTENT_CODE) {
             if (resultCode == RESULT_OK) {
                 updateMemoList()
             }
@@ -101,10 +107,10 @@ class MainActivity : AppCompatActivity(),
         return when (item.itemId) {
             R.id.add_memo -> {
                 val intent = Intent(this, MemoEditActivity::class.java)
-                var memo : MemoData =
+                var memo: MemoData =
                     MemoData()
                 intent.putExtra("MEMO_DATA", memo)
-                startActivityForResult(intent, changeCode)
+                startActivityForResult(intent, INTENT_CODE)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -117,11 +123,10 @@ class MainActivity : AppCompatActivity(),
     override fun onItemClick(view: View, position: Int) {
         Log.d(TAG, "onItemClick")
         val memo = mMemoAdapter.getMemo(position)
-        if(memo != null)
-        {
+        if (memo != null) {
             val intent = Intent(this, MemoDetailsActivity::class.java)
             intent.putExtra("MEMO_DATA", memo)
-            startActivityForResult(intent, changeCode)
+            startActivityForResult(intent, INTENT_CODE)
         }
     }
 }

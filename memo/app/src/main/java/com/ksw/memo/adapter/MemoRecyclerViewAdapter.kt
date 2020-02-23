@@ -26,6 +26,7 @@ class MemoRecyclerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 //-------------------------------------------------------------------------------------------------- MemoRecyclerViewAdapter
 class MemoRecyclerViewAdapter(val memoList: List<MemoData>) :
     RecyclerView.Adapter<MemoRecyclerViewHolder>() {
+
     private val TAG = "MemoRecyclerViewAdapter"
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoRecyclerViewHolder {
         Log.d(TAG, "onCreateViewHolder called")

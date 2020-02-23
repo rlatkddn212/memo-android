@@ -31,6 +31,7 @@ import kotlinx.android.synthetic.main.content_memo_details.*
 import java.io.File
 import java.util.ArrayList
 
+const val DETAILS_CODE: Int = 1
 //-------------------------------------------------------------------------------------------------- MemoDetailsActivity
 class MemoDetailsActivity : AppCompatActivity() {
     private val TAG = "MemoDetailsActivity"
@@ -38,7 +39,7 @@ class MemoDetailsActivity : AppCompatActivity() {
         Log.e(TAG, "DB Error")
     })
     private lateinit var mMemo: MemoData
-    private val ChangeCode: Int = 101
+
 
     private var mImageList:MutableList<String> = ArrayList()
     private lateinit var mImageAdapter: ImageDetailsRecyclerViewAdapter
@@ -46,7 +47,6 @@ class MemoDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memo_details)
-        // setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         mMemo = intent.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
@@ -68,18 +68,16 @@ class MemoDetailsActivity : AppCompatActivity() {
             builder
                 .setPositiveButton("확인") { dialogInterface, i ->
                     // 파일 삭제
-                    for(removeImage in mImageList) {
+                    for (removeImage in mImageList) {
                         if (removeImage.startsWith("http", 0)) continue
                         val deleteFile = File(Uri.parse(removeImage).path)
                         if (deleteFile.exists()) {
-                            Log.d(TAG, "delete file $deleteFile")
                             deleteFile.delete()
                         }
                     }
 
                     mDbHelper.deleteMemo(mMemo.memoId)
                     val intent = Intent()
-                    // intent.putExtra("MEMO_DATA", memo)
                     setResult(RESULT_OK, intent)
                     finish()
                 }
@@ -90,6 +88,9 @@ class MemoDetailsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 이미지를 갱신
+     */
     private fun updateImageList() {
         val cursor : Cursor = mDbHelper.getAllMemoImage(mMemo.memoId)
         mImageList.clear()
@@ -110,12 +111,11 @@ class MemoDetailsActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(TAG, "onActivityResult $requestCode, $resultCode")
-        if (requestCode == ChangeCode) {
+        if (requestCode == DETAILS_CODE) {
             if (resultCode == RESULT_OK) {
                 mMemo = data?.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
                 title_details.text = mMemo.title
                 contents_details.text = mMemo.contents
-
                 updateImageList()
             }
         }
@@ -139,7 +139,7 @@ class MemoDetailsActivity : AppCompatActivity() {
             R.id.edit_memo -> {
                 val intent = Intent(this, MemoEditActivity::class.java)
                 intent.putExtra("MEMO_DATA", mMemo)
-                startActivityForResult(intent, ChangeCode)
+                startActivityForResult(intent, DETAILS_CODE)
 
                 true
             }
