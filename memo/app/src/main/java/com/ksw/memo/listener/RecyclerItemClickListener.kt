@@ -25,7 +25,6 @@ class RecyclerItemClickListener (context : Context, recyclerView: RecyclerView,
             Log.d(TAG, "onSingleTapUp onItemClick")
             if (childView != null)
                 listener.onItemClick(childView, recyclerView.getChildAdapterPosition(childView))
-
             return true
         }
     })

@@ -35,10 +35,9 @@ const val INTENT_CODE: Int = 1
 class MainActivity : AppCompatActivity(),
     RecyclerItemClickListener.OnRecyclerClickListener {
     private val TAG = "MainActivity"
-    private var mMemolist: MutableList<MemoData> = ArrayList()
-    private lateinit var mMemoAdapter: MemoRecyclerViewAdapter
-
-    val mDbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
+    private var _memoList: MutableList<MemoData> = ArrayList()
+    private lateinit var _memoAdapter: MemoRecyclerViewAdapter
+    private val _dbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
         Log.e(TAG, "DB Error")
     })
 
@@ -53,26 +52,21 @@ class MainActivity : AppCompatActivity(),
             RecyclerItemClickListener(this, recycler_view, this)
         )
 
-        mMemoAdapter = MemoRecyclerViewAdapter(mMemolist)
-        recycler_view.adapter = mMemoAdapter
+        _memoAdapter = MemoRecyclerViewAdapter(_memoList)
+        recycler_view.adapter = _memoAdapter
 
         updateMemoList()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "Start!!!")
     }
 
     /**
      * 메모 리스트 갱신
      */
     private fun updateMemoList() {
-        val cursor: Cursor = mDbHelper.getAllMemo()
-        mMemolist.clear()
+        val cursor: Cursor = _dbHelper.getAllMemo()
+        _memoList.clear()
         if (cursor.moveToFirst()) {
             do {
-                mMemolist.add(
+                _memoList.add(
                     MemoData(
                         cursor.getLong(0),
                         cursor.getString(1),
@@ -84,7 +78,7 @@ class MainActivity : AppCompatActivity(),
             } while (cursor.moveToNext())
         }
 
-        mMemoAdapter.notifyDataSetChanged()
+        _memoAdapter.notifyDataSetChanged()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -121,8 +115,8 @@ class MainActivity : AppCompatActivity(),
      * 리사이클러 뷰에 리스트 아이템을 클릭
      */
     override fun onItemClick(view: View, position: Int) {
-        Log.d(TAG, "onItemClick")
-        val memo = mMemoAdapter.getMemo(position)
+        Log.d(TAG, "onItemClick : $position")
+        val memo = _memoAdapter.getMemo(position)
         if (memo != null) {
             val intent = Intent(this, MemoDetailsActivity::class.java)
             intent.putExtra("MEMO_DATA", memo)

@@ -20,7 +20,7 @@ import com.squareup.picasso.Picasso
 class MemoRecyclerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     var title: TextView = view.findViewById(R.id.title)
     var contents : TextView = view.findViewById(R.id.contents)
-    var memo_thumbnail: ImageView = view.findViewById(R.id.memo_thumbnail)
+    var memoThumbnail: ImageView = view.findViewById(R.id.memo_thumbnail)
 }
 
 //-------------------------------------------------------------------------------------------------- MemoRecyclerViewAdapter
@@ -53,7 +53,7 @@ class MemoRecyclerViewAdapter(val memoList: List<MemoData>) :
                 .load(Uri.parse(memo.thumbnail))
                 .error(R.drawable.brokenimage)
                 .placeholder(R.drawable.placeholder)
-                .into(holder.memo_thumbnail)
+                .into(holder.memoThumbnail)
         }
         holder.title.text = memo.title
         holder.contents.text = memo.contents

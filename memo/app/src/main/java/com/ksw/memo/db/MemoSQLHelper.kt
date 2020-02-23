@@ -76,8 +76,8 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val contentValues = ContentValues()
         contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_TITLE, title)
         contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_CONTENTS, contents)
-        if (!imageURL?.isEmpty()!!){
-            contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
+        if (!imageURL.isNullOrEmpty()){
+            contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL[0])
         }else {
             contentValues.put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, "")
         }
@@ -107,10 +107,8 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
     fun deleteMemo(memoId : Long) {
         val db = writableDatabase
         val selection = "${BaseColumns._ID} = ?"
-        // Specify arguments in placeholder order.
         val selectionArgs = arrayOf(memoId.toString())
-        // Issue SQL statement.
-        val deletedRows = db.delete(MemoStorage.MemoTable.TABLE_NAME, selection, selectionArgs)
+        db.delete(MemoStorage.MemoTable.TABLE_NAME, selection, selectionArgs)
         deleteMemoImage(memoId)
     }
 
@@ -123,8 +121,8 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val values = ContentValues().apply {
             put(MemoStorage.MemoTable.COLUMN_NAME_TITLE, title)
             put(MemoStorage.MemoTable.COLUMN_NAME_CONTENTS, contents)
-            if (!imageURL?.isEmpty()!!) {
-                put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL?.get(0))
+            if (!imageURL.isNullOrEmpty()) {
+                put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, imageURL[0])
             }
             else{
                 put(MemoStorage.MemoTable.COLUMN_NAME_THUMBNAIL, "")
@@ -173,7 +171,7 @@ class MemoSQLHelper(context: Context, errorHandler: DatabaseErrorHandler)
         val db = writableDatabase
         val selection = "${MemoStorage.MemoImageTable.COLUMN_NAME_MEMO_ID} = ?"
         val selectionArgs = arrayOf(memoId.toString())
-        val deletedRows = db.delete(MemoStorage.MemoImageTable.TABLE_NAME, selection, selectionArgs)
+        db.delete(MemoStorage.MemoImageTable.TABLE_NAME, selection, selectionArgs)
     }
 
     companion object {

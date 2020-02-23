@@ -5,6 +5,10 @@
     <string name="title_activity_memo_edit">메모 편집 및 작성</string>
 
     <string name="image_delete_title_memo_edit">이미지 삭제</string>
-    <string name="image_delete_question_memo_edit">"이미지를 삭제하시겠습니까?"</string>
+    <string name="image_delete_question_memo_edit">이미지를 삭제하시겠습니까?</string>
+    <string name="image_url_title_memo_edit">URL 이미지 불러오기</string>
+    <string name="image_url_question_memo_edit">URL을 입력하세요.</string>
 
+    <string name="dialog_ok">"확인"</string>
+    <string name="dialog_cancel">"취소"</string>
 </resources>

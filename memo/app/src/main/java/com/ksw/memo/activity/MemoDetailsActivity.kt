@@ -35,40 +35,43 @@ const val DETAILS_CODE: Int = 1
 //-------------------------------------------------------------------------------------------------- MemoDetailsActivity
 class MemoDetailsActivity : AppCompatActivity() {
     private val TAG = "MemoDetailsActivity"
-    private val mDbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
+    private val _dbHelper = MemoSQLHelper(this, DatabaseErrorHandler {
         Log.e(TAG, "DB Error")
     })
-    private lateinit var mMemo: MemoData
+    private lateinit var _memo: MemoData
+    private var _imageList:MutableList<String> = ArrayList()
+    private lateinit var _imageAdapter: ImageDetailsRecyclerViewAdapter
 
-
-    private var mImageList:MutableList<String> = ArrayList()
-    private lateinit var mImageAdapter: ImageDetailsRecyclerViewAdapter
-
+    /**
+     * 1. Intent로 넘겨 받은 데이터 설정
+     * 2. 리사이클러 뷰 연결
+     * 3. 메모 삭제 리스너 등록
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memo_details)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        mMemo = intent.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
+        _memo = intent.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
 
-        title_details.text = mMemo.title
-        contents_details.text = mMemo.contents
+        title_details.text = _memo.title
+        contents_details.text = _memo.contents
 
         // 리사이클러 뷰 연결
         details_recycler_view.layoutManager = LinearLayoutManager(this)
-        mImageAdapter = ImageDetailsRecyclerViewAdapter(mImageList)
-        details_recycler_view.adapter = mImageAdapter
+        _imageAdapter = ImageDetailsRecyclerViewAdapter(_imageList)
+        details_recycler_view.adapter = _imageAdapter
         updateImageList()
 
         delete_button.setOnClickListener {
             val builder = AlertDialog.Builder(this)
-            builder.setTitle(mMemo.title);
+            builder.setTitle(_memo.title);
             builder.setMessage("메모를 삭제하시겠습니까?")
 
             builder
                 .setPositiveButton("확인") { dialogInterface, i ->
                     // 파일 삭제
-                    for (removeImage in mImageList) {
+                    for (removeImage in _imageList) {
                         if (removeImage.startsWith("http", 0)) continue
                         val deleteFile = File(Uri.parse(removeImage).path)
                         if (deleteFile.exists()) {
@@ -76,7 +79,7 @@ class MemoDetailsActivity : AppCompatActivity() {
                         }
                     }
 
-                    mDbHelper.deleteMemo(mMemo.memoId)
+                    _dbHelper.deleteMemo(_memo.memoId)
                     val intent = Intent()
                     setResult(RESULT_OK, intent)
                     finish()
@@ -92,20 +95,20 @@ class MemoDetailsActivity : AppCompatActivity() {
      * 이미지를 갱신
      */
     private fun updateImageList() {
-        val cursor : Cursor = mDbHelper.getAllMemoImage(mMemo.memoId)
-        mImageList.clear()
-        mMemo.imageURL?.clear()
+        val cursor : Cursor = _dbHelper.getAllMemoImage(_memo.memoId)
+        _imageList.clear()
+        _memo.imageURL?.clear()
         if (cursor.moveToFirst()) {
             do {
-                mImageList.add(
+                _imageList.add(
                     cursor.getString(2)
                 )
-                mMemo.imageURL?.add( cursor.getString(2))
+                _memo.imageURL?.add( cursor.getString(2))
 
             } while (cursor.moveToNext())
         }
 
-        mImageAdapter.notifyDataSetChanged()
+        _imageAdapter.notifyDataSetChanged()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -113,9 +116,9 @@ class MemoDetailsActivity : AppCompatActivity() {
         Log.d(TAG, "onActivityResult $requestCode, $resultCode")
         if (requestCode == DETAILS_CODE) {
             if (resultCode == RESULT_OK) {
-                mMemo = data?.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
-                title_details.text = mMemo.title
-                contents_details.text = mMemo.contents
+                _memo = data?.extras?.getParcelable<MemoData>("MEMO_DATA") as MemoData
+                title_details.text = _memo.title
+                contents_details.text = _memo.contents
                 updateImageList()
             }
         }
@@ -133,14 +136,12 @@ class MemoDetailsActivity : AppCompatActivity() {
                 val intent = Intent()
                 setResult(RESULT_OK, intent)
                 finish()
-
                 true
             }
             R.id.edit_memo -> {
                 val intent = Intent(this, MemoEditActivity::class.java)
-                intent.putExtra("MEMO_DATA", mMemo)
+                intent.putExtra("MEMO_DATA", _memo)
                 startActivityForResult(intent, DETAILS_CODE)
-
                 true
             }
             else -> super.onOptionsItemSelected(item)
